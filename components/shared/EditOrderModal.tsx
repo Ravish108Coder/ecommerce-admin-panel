@@ -41,7 +41,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import {
     Select,
     SelectContent,
@@ -53,12 +53,13 @@ import {
 } from "@/components/ui/select"
 import { ProductTypeToPrice } from "../TableComponent"
 
-interface CreateOrderModalProps {
+interface EditOrderModalProps {
     setOrders: (orders: any) => void;
+    orderDetails: any;
     Orders: any;
 }
 
-export default function CreateOrderModal({ setOrders, Orders }: CreateOrderModalProps) {
+export default function EditOrderModal({ setOrders, orderDetails, Orders }: EditOrderModalProps) {
     // const CreateOrderModal : React.FC() = () => {}
     // export default CreateOrderModal
 
@@ -68,37 +69,19 @@ export default function CreateOrderModal({ setOrders, Orders }: CreateOrderModal
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            customerName: "",
-            customerEmail: "",
-            productName: "",
-            quantity: 1,
+            customerName: orderDetails.customer_name,
+            customerEmail: orderDetails.customer_email,
+            productName: orderDetails.product,
+            quantity: orderDetails.quantity,
 
         },
     })
-
-    function generateObjectId() {
-        const timestamp = Math.floor(Date.now() / 1000).toString(16); 
-      
-        const randomBytes = (length: number) => {
-          const characters = '0123456789abcdef';
-          let result = '';
-          for (let i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * 16));
-          }
-          return result;
-        };
-      
-        const machineIdentifier = randomBytes(6); 
-        const counter = randomBytes(10); 
-      
-        return timestamp + machineIdentifier + counter;
-      }
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values)
 
         const newOrder = {
-            id: generateObjectId(),
+            id: orderDetails.id,
             customer_name: values.customerName,
             customer_email: values.customerEmail,
             product: values.productName,
@@ -106,13 +89,16 @@ export default function CreateOrderModal({ setOrders, Orders }: CreateOrderModal
             order_value: values.quantity * ProductTypeToPrice[values.productName]
         }
 
-        const newOrders = [...Orders, newOrder]
-
+        const newOrders = Orders.map((order: any) => {
+            if (order.id === orderDetails.id) {
+                return newOrder
+            }
+            return order
+        })
         setOrders(newOrders)
 
         // Close the modal
         setIsOpen(false)
-        form.reset()
 
     }
 
@@ -121,11 +107,11 @@ export default function CreateOrderModal({ setOrders, Orders }: CreateOrderModal
             isOpen ? (form.reset(), setIsOpen(false)) : setIsOpen(true)
         }}>
             <DialogTrigger asChild>
-                <Button className="w-full md:max-w-[113px]">Create Order</Button>
+                <Button variant="outline">Edit</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Create Order</DialogTitle>
+                    <DialogTitle>Edit Order</DialogTitle>
                     {/* <DialogDescription>
                         Fill in the details to create a new order. Click Create Order when you're done.
                     </DialogDescription> */}
@@ -140,7 +126,7 @@ export default function CreateOrderModal({ setOrders, Orders }: CreateOrderModal
                                 <FormItem>
                                     <FormLabel>Customer Name</FormLabel>
                                     <FormControl>
-                                        <Input autoComplete="off" placeholder="e.g. John Doe" {...field} />
+                                        <Input autoComplete="off" placeholder="John Doe" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -153,7 +139,7 @@ export default function CreateOrderModal({ setOrders, Orders }: CreateOrderModal
                                 <FormItem>
                                     <FormLabel>Customer Email</FormLabel>
                                     <FormControl>
-                                        <Input autoComplete="off" placeholder="e.g. john@mail.com" {...field} />
+                                        <Input autoComplete="off" placeholder="john@mail.com" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -211,7 +197,7 @@ export default function CreateOrderModal({ setOrders, Orders }: CreateOrderModal
                             )}
                         />
 
-                        <Button type="submit">Submit</Button>
+                        <Button type="submit">Update</Button>
                     </form>
                 </Form>
 
