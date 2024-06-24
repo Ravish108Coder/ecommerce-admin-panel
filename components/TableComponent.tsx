@@ -23,6 +23,7 @@ import { Input } from './ui/input';
 import CreateOrderModal from './shared/CreateOrderModal';
 import { UserButton } from '@clerk/nextjs';
 import EditOrderModal from './shared/EditOrderModal';
+import DeleteOrderModal from './shared/DeleteOrderModal';
 
 type ProductType = "Product 1" | "Product 2" | "Product 3"
 
@@ -87,10 +88,6 @@ export default function TableComponent() {
         setFilter(prev=>prev)
     }, [Orders])
 
-    const handleDeleteOrder = (orderId: any) => {
-        setOrders(Orders.filter(order => order.id !== orderId))
-    }
-
     return (
         <div>
             <div className='flex flex-col items-start md:flex-row md:justify-between md:items-center mb-3 px-3 gap-3'>
@@ -128,7 +125,7 @@ export default function TableComponent() {
                             <TableCell>{order.order_value}</TableCell>
                             <TableCell className="">{
                                 <div className='flex justify-center items-center'>
-                                    <Trash onClick={() => handleDeleteOrder(order.id)} className='h-4 w-4 cursor-pointer' />
+                                    <DeleteOrderModal orderDetails={order} setOrders={setOrders} Orders={Orders} />
                                 </div>
                             }</TableCell>
                             <TableCell className="text-right">
